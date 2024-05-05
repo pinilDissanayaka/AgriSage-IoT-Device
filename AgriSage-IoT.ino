@@ -1,6 +1,12 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <Firebase_ESP_Client.h>
+#include <DHT.h>
+
+#define DHTPIN 4    
+
+#define DHTTYPE DHT11
+DHT dht(DHTPIN, DHTTYPE);
 
 //Provide the token generation process info.
 #include "addons/TokenHelper.h"
@@ -24,12 +30,12 @@ FirebaseAuth auth;
 FirebaseConfig config;
 
 unsigned long sendDataPrevMillis = 0;
-int count = 0;
 bool signupOK = false;
 
 void setup(){
   pinMode(2, OUTPUT);
   Serial.begin(115200);
+  dht.begin();
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   Serial.print("Connecting to Wi-Fi");
   
@@ -69,29 +75,31 @@ void setup(){
 }
 
 void loop(){
-  if (Firebase.ready() && signupOK && (millis() - sendDataPrevMillis > 15000 || sendDataPrevMillis == 0)){
+
+
+  float h, t = getTemp();
+
+  if (Firebase.ready() && signupOK && (millis() - sendDataPrevMillis > 1500 || sendDataPrevMillis == 0)){
     sendDataPrevMillis = millis();
-    // Write an Int number on the database path test/int
-    if (Firebase.RTDB.setInt(&fbdo, "1234/humidity", count)){
-      Serial.println("PASSED");
-      Serial.println("PATH: " + fbdo.dataPath());
-      Serial.println("TYPE: " + fbdo.dataType());
-    }
-    else {
-      Serial.println("FAILED");
-      Serial.println("REASON: " + fbdo.errorReason());
-    }
-    count++;
-    
-    // Write an Float number on the database path test/float
-    if (Firebase.RTDB.setFloat(&fbdo, "1234/temperature", 0.01 + random(0,100))){
-      Serial.println("PASSED");
-      Serial.println("PATH: " + fbdo.dataPath());
-      Serial.println("TYPE: " + fbdo.dataType());
-    }
-    else {
-      Serial.println("FAILED");
-      Serial.println("REASON: " + fbdo.errorReason());
-    }
+
+    Firebase.RTDB.setInt(&fbdo, "1234/humidity", h);
+    Firebase.RTDB.setFloat(&fbdo, "1234/temperature", t);
   }
 }
+
+
+float getTemp(){
+
+  delay(1000);
+  float h = dht.readHumidity();
+  float t = dht.readTemperature();
+
+
+  if (isnan(h) || isnan(t)) {
+    Serial.println(F("Failed to read from DHT sensor!"));
+    return 0;
+  }
+
+  return h, t;
+}
+
