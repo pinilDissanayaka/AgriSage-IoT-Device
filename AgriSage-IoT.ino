@@ -28,18 +28,23 @@ int count = 0;
 bool signupOK = false;
 
 void setup(){
+  pinMode(2, OUTPUT);
   Serial.begin(115200);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   Serial.print("Connecting to Wi-Fi");
   
   while (WiFi.status() != WL_CONNECTED){
     Serial.print(".");
+    digitalWrite(2, HIGH);
+    delay(300);
+    digitalWrite(2, LOW);
     delay(300);
   }
   Serial.println();
   Serial.print("Connected with IP: ");
   Serial.println(WiFi.localIP());
   Serial.println();
+  digitalWrite(2, HIGH);
 
   /* Assign the api key (required) */
   config.api_key = API_KEY;
