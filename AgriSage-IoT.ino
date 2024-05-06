@@ -3,11 +3,6 @@
 #include <Firebase_ESP_Client.h>
 #include <DHT.h>
 
-#define DHTPIN 4    
-
-#define DHTTYPE DHT11
-DHT dht(DHTPIN, DHTTYPE);
-
 //Provide the token generation process info.
 #include "addons/TokenHelper.h"
 //Provide the RTDB payload printing info and other helper functions.
@@ -19,9 +14,14 @@ DHT dht(DHTPIN, DHTTYPE);
 
 // Insert Firebase project API Key
 #define API_KEY "AIzaSyCMsRoYBGZnnttlDbtScuMfhHfqYnF57R0"
-
 // Insert RTDB URLefine the RTDB URL */
 #define DATABASE_URL "https://agrisage-85205-default-rtdb.asia-southeast1.firebasedatabase.app/" 
+
+#define DHTPIN 4
+#define SMOISTURE_PIN 36    
+
+#define DHTTYPE DHT11
+DHT dht(DHTPIN, DHTTYPE);
 
 //Define Firebase Data object
 FirebaseData fbdo;
@@ -78,19 +78,26 @@ void loop(){
 
 
   float h, t = getTemp();
+  int soilMoisture = getSoilMoisture();
 
-  if (Firebase.ready() && signupOK && (millis() - sendDataPrevMillis > 1500 || sendDataPrevMillis == 0)){
+  if (Firebase.ready() && signupOK && (millis() - sendDataPrevMillis > 800 || sendDataPrevMillis == 0)){
     sendDataPrevMillis = millis();
 
     Firebase.RTDB.setInt(&fbdo, "1234/humidity", h);
     Firebase.RTDB.setFloat(&fbdo, "1234/temperature", t);
+    Firebase.RTDB.setFloat(&fbdo, "1234/soilMoisture", soilMoisture);
+
+    if (Firebase.RTDB.getInt(&fbdo, "/test/int")) {
+      treshold = fbdo.intData();
+    }
   }
+  
 }
 
 
 float getTemp(){
 
-  delay(1000);
+  delay(500);
   float h = dht.readHumidity();
   float t = dht.readTemperature();
 
@@ -102,4 +109,20 @@ float getTemp(){
 
   return h, t;
 }
+
+
+int getSoilMoisture(){
+  delay(500)
+  int value = analogRead(AOUT_PIN);
+  
+  if(isnan(value)){
+    return 0;
+  }
+  else{
+    return value;
+  }
+}
+
+
+
 
