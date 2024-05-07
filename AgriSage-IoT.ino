@@ -77,14 +77,14 @@ void setup(){
 void loop(){
 
 
-  float h, t = getTemp();
+  float humidity, temperature = getTemp();
   int soilMoisture = getSoilMoisture();
 
   if (Firebase.ready() && signupOK && (millis() - sendDataPrevMillis > 800 || sendDataPrevMillis == 0)){
     sendDataPrevMillis = millis();
 
-    Firebase.RTDB.setInt(&fbdo, "1234/humidity", h);
-    Firebase.RTDB.setFloat(&fbdo, "1234/temperature", t);
+    Firebase.RTDB.setInt(&fbdo, "1234/humidity", humidity);
+    Firebase.RTDB.setFloat(&fbdo, "1234/temperature", temperature);
     Firebase.RTDB.setFloat(&fbdo, "1234/soilMoisture", soilMoisture);
 
     if (Firebase.RTDB.getInt(&fbdo, "/test/int")) {
@@ -98,8 +98,8 @@ void loop(){
 float getTemp(){
 
   delay(500);
-  float h = dht.readHumidity();
-  float t = dht.readTemperature();
+  float humidity = dht.readHumidity();
+  float temperature = dht.readTemperature();
 
 
   if (isnan(h) || isnan(t)) {
@@ -107,7 +107,7 @@ float getTemp(){
     return 0;
   }
 
-  return h, t;
+  return humidity, temperature;
 }
 
 
