@@ -79,16 +79,22 @@ void loop(){
 
   float humidity, temperature = getTemp();
   int soilMoisture = getSoilMoisture();
+  float calcium, nitrogen, potassium = getSoilNutrients();
 
   if (Firebase.ready() && signupOK && (millis() - sendDataPrevMillis > 800 || sendDataPrevMillis == 0)){
     sendDataPrevMillis = millis();
 
     Firebase.RTDB.setInt(&fbdo, "1234/humidity", humidity);
     Firebase.RTDB.setFloat(&fbdo, "1234/temperature", temperature);
+
     Firebase.RTDB.setFloat(&fbdo, "1234/soilMoisture", soilMoisture);
 
-    if (Firebase.RTDB.getInt(&fbdo, "/test/int")) {
-      treshold = fbdo.intData();
+    Firebase.RTDB.setFloat(&fbdo, "1234/calcium", calcium);
+    Firebase.RTDB.setFloat(&fbdo, "1234/nitrogen", nitrogen);
+    Firebase.RTDB.setFloat(&fbdo, "1234/potassium", potassium);
+
+    if (Firebase.RTDB.getInt(&fbdo, "/test/treshold")) {
+      float treshold = fbdo.intData();
     }
   }
   
@@ -102,7 +108,7 @@ float getTemp(){
   float temperature = dht.readTemperature();
 
 
-  if (isnan(h) || isnan(t)) {
+  if (isnan(humidity) || isnan(temperature)) {
     Serial.println(F("Failed to read from DHT sensor!"));
     return 0;
   }
@@ -112,8 +118,8 @@ float getTemp(){
 
 
 int getSoilMoisture(){
-  delay(500)
-  int value = analogRead(AOUT_PIN);
+  delay(500);
+  int value = analogRead(SMOISTURE_PIN);
   
   if(isnan(value)){
     return 0;
@@ -121,6 +127,17 @@ int getSoilMoisture(){
   else{
     return value;
   }
+}
+
+float getSoilNutrients(){
+  delay(500);
+  float calcium, nitrogen, potassium;
+
+  calcium=random(0, 1000) / 1000;
+  nitrogen=random(0, 1200) / 1000;
+  potassium=random(0, 1100) / 1000;
+
+  return calcium, nitrogen, potassium;
 }
 
 
