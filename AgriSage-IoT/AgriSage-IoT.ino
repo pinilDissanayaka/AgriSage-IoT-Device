@@ -2,6 +2,7 @@
 #include <WiFi.h>
 #include <Firebase_ESP_Client.h>
 #include <DHT.h>
+#include <BH1750.h>
 
 //Provide the token generation process info.
 #include "addons/TokenHelper.h"
@@ -17,11 +18,12 @@
 // Insert RTDB URLefine the RTDB URL */
 #define DATABASE_URL "https://agrisage-85205-default-rtdb.asia-southeast1.firebasedatabase.app/" 
 
-#define DHTPIN 4
-#define SMOISTURE_PIN 36    
+#define DHT_PIN 4
+#define SMOISTURE_PIN 36   
+#define WATER_LEVEL_PIN 39 
 
 #define DHTTYPE DHT11
-DHT dht(DHTPIN, DHTTYPE);
+DHT dht(DHT_PIN, DHTTYPE);
 
 //Define Firebase Data object
 FirebaseData fbdo;
@@ -80,6 +82,7 @@ void loop(){
   float humidity, temperature = getTemp();
   int soilMoisture = getSoilMoisture();
   float calcium, nitrogen, potassium = getSoilNutrients();
+  int waterLevel= getWaterLevel();
 
   if (Firebase.ready() && signupOK && (millis() - sendDataPrevMillis > 800 || sendDataPrevMillis == 0)){
     sendDataPrevMillis = millis();
@@ -92,6 +95,8 @@ void loop(){
     Firebase.RTDB.setFloat(&fbdo, "1234/calcium", calcium);
     Firebase.RTDB.setFloat(&fbdo, "1234/nitrogen", nitrogen);
     Firebase.RTDB.setFloat(&fbdo, "1234/potassium", potassium);
+
+    Firebase.RTDB.setInt(&fbdo, "1234/waterLavel", waterLevel);
 
     if (Firebase.RTDB.getInt(&fbdo, "/test/treshold")) {
       float treshold = fbdo.intData();
@@ -138,6 +143,18 @@ float getSoilNutrients(){
   potassium=random(0, 1100) / 1000;
 
   return calcium, nitrogen, potassium;
+}
+
+int getWaterLevel(){
+  delay(500);
+  int value = analogRead(WATER_LEVEL_PIN);
+  
+  if(isnan(value)){
+    return 0;
+  }
+  else{
+    return value;
+  }
 }
 
 
