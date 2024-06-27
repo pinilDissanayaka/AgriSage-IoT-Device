@@ -18,9 +18,10 @@
 // Insert RTDB URLefine the RTDB URL */
 #define DATABASE_URL "https://agrisage-85205-default-rtdb.asia-southeast1.firebasedatabase.app/" 
 
-#define DHT_PIN 4
-#define SMOISTURE_PIN 36   
-#define WATER_LEVEL_PIN 39 
+#define DHT_PIN 4 // Pin for DHT sensor
+#define SMOISTURE_PIN 36 // Pin for Soil moisure sensor
+#define WATER_LEVEL_PIN 39 // Pin for water level sensor
+#define Ph_PIN 40 // pin for ph sensor
 
 #define DHTTYPE DHT11
 DHT dht(DHT_PIN, DHTTYPE);
@@ -83,6 +84,7 @@ void loop(){
   int soilMoisture = getSoilMoisture();
   float calcium, nitrogen, potassium = getSoilNutrients();
   int waterLevel= getWaterLevel();
+  float phLavel=getPhLevel();
 
   if (Firebase.ready() && signupOK && (millis() - sendDataPrevMillis > 800 || sendDataPrevMillis == 0)){
     sendDataPrevMillis = millis();
@@ -97,6 +99,9 @@ void loop(){
     Firebase.RTDB.setFloat(&fbdo, "1234/potassium", potassium);
 
     Firebase.RTDB.setInt(&fbdo, "1234/waterLavel", waterLevel);
+
+    Firebase.RTDB.setInt(&fbdo, "1234/phLavel", phLavel);
+
 
     if (Firebase.RTDB.getInt(&fbdo, "/test/treshold")) {
       float treshold = fbdo.intData();
@@ -157,6 +162,13 @@ int getWaterLevel(){
   }
 }
 
+float getPhLevel(){
+  delay(500);
+  float value=analogRead(Ph_PIN);
+  float voltage=value*(3.3/4095.0);
+  float phLavel=3.3*voltage;
+  return phLavel;
+}
 
 
 
