@@ -22,6 +22,7 @@
 #define SMOISTURE_PIN 36 // Pin for Soil moisure sensor
 #define WATER_LEVEL_PIN 39 // Pin for water level sensor
 #define Ph_PIN 40 // pin for ph sensor
+#define RELAY_PIN 12 //pin for water motor relay
 
 #define DHTTYPE DHT11
 DHT dht(DHT_PIN, DHTTYPE);
@@ -103,8 +104,9 @@ void loop(){
     Firebase.RTDB.setInt(&fbdo, "1234/phLavel", phLavel);
 
 
-    if (Firebase.RTDB.getInt(&fbdo, "/test/treshold")) {
-      float treshold = fbdo.intData();
+    if (Firebase.RTDB.getInt(&fbdo, "123/threshold")) {
+      int threshold = fbdo.intData();
+      waterMotor(threshold, waterLevel);
     }
   }
   
@@ -168,6 +170,16 @@ float getPhLevel(){
   float voltage=value*(3.3/4095.0);
   float phLavel=3.3*voltage;
   return phLavel;
+}
+
+void waterMotor(int threshold, int waterLevel){
+  if(threshold >= waterLevel){
+    digitalWrite(RELAY_PIN, HIGH);
+  }
+  else{
+    digitalWrite(RELAY_PIN, LOW);
+  }
+
 }
 
 
