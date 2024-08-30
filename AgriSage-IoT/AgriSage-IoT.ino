@@ -48,6 +48,9 @@ FirebaseConfig config;
 unsigned long sendDataPrevMillis = 0;
 bool signupOK = false;
 
+// A byte array to store NPK values
+byte values[11];
+
 void setup(){
   pinMode(2, OUTPUT);
   Serial.begin(115200);
